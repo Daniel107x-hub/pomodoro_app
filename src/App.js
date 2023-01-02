@@ -1,11 +1,10 @@
+import React, { useLayoutEffect } from "react";
+
 function App() {
-  return (
-    <div className="App">
-      <h1 className="text-4xl font-bold underline text-slate-400">
-        Hello world!
-      </h1>
-    </div>
-  );
+  useLayoutEffect(() => {
+    document.body.className = "bg-red-300";
+  }, []);
+  return <div>Hello</div>;
 }
 
 export default App;
