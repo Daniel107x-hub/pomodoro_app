@@ -1,7 +1,9 @@
 import React, { useLayoutEffect, useState, useEffect } from "react";
-import { IconContext } from "react-icons";
+import {IconContext} from "react-icons";
 import {GiTomato} from 'react-icons/gi';
 import {RxGear} from 'react-icons/rx';
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {SiAddthis} from "react-icons/si";
 
 const WhiteIcon = (props) => {
   return(
@@ -12,10 +14,36 @@ const WhiteIcon = (props) => {
   )
 }
 
+const getTime = (s) =>{
+  const minutes = Math.floor(s / 60);
+  const seconds = s % 60;
+  return `${minutes<10?`0${minutes}`:`${minutes }`}:${seconds<10?`0${seconds}`:`${seconds}`}`;
+}
+
 function App() {
   useLayoutEffect(() => {
     document.body.className = "bg-red-500";
   }, []);
+  const [status, setStatus] = useState("Time to focus");
+  const [tasks, setTasks] = useState([]);
+
+  const handleStart = () => {
+    setStatus("Keep working");
+  }
+
+  const handleStop = () => {
+    setStatus("Time to focus");
+  }
+
+  const handleNewTask = () => {
+    const task = prompt("What is the task name?");
+    setTasks(prevTasks => [...prevTasks, task]);
+    alert("New task added.")
+  }
+
+  const noTasks = <div className="no-tasks">
+    You have no tasks!
+  </div>
 
   const content = <div className="app container mx-auto font-medium font-mono my-4 text-neutral-100 ">
     <section className="options container mx-auto flex flex-row justify-between">
@@ -27,12 +55,67 @@ function App() {
       </Button>
     </section>
     <section className="timer container mx-auto flex justify-center">
-      <Timing/>
+      <Timing onStart={handleStart} onStop={handleStop}/>
     </section>
-    {/* <section className="info">Info</section>
-    <section className="tasks">Tasks</section> */}
+    <section className="info container mx-auto flex justify-center text-lg">
+      {status}
+    </section>
+    <section className="tasks container mx-auto m-4 flex flex-col justify-center items-center">
+      <div className="actions w-1/4 border-b-2 flex justify-between text-xl pb-2 items-center">
+        <span>Tasks</span>
+        {/* TODO: <ContextualMenu/> */}
+      </div>
+      <div className="viewer my-4 w-1/4 flex justify-center text-lg">
+      {
+          tasks.length === 0 && noTasks
+      } 
+      {
+        tasks.length > 0 &&
+        <div className="tasks w-full">
+          {
+            tasks.map(task => 
+              <Card key={task}>
+                <Task name={task}/>
+              </Card>  
+            )
+          }
+        </div>
+      }
+      </div>
+      <div className="new-task flex flex-row w-1/4 justify-center text-lg border-white border-2 border-dashed rounded-lg py-3 cursor-pointer hover:bg-red-400 duration-300" onClick={handleNewTask}>
+        <span className="icon mr-4">
+          <WhiteIcon><SiAddthis/></WhiteIcon>
+        </span>
+        <span className="text">Add task</span>
+      </div>
+    </section>
   </div>
   return content;
+}
+
+const ContextualMenu = (props) =>{
+  const menu = <section className="actions">
+    <div className="menu-container border-4 py-2 px-1 border-red-200 rounded-md cursor-pointer hover:border-red-300 duration-300"><BsThreeDotsVertical/></div>
+  </section>
+  return menu;
+}
+
+const Task = (props) =>{
+  const taskContent = <div className="task flex flex-row items-center justify-between">
+    <section className="status flex flex-row items-center">
+      <span className="state inline-block w-9 h-9 mr-2 bg-red-400 flex items-center rounded-full after:content-[''] after:border-r-4 after:border-b-4 after:border-white after:w-2 after:h-4 after:block after:mx-auto after:rotate-45 hover:bg-red-300 cursor-pointer duration-300"></span>
+      <span className="info">{props.name}</span>
+    </section>
+    <ContextualMenu/>
+  </div>
+
+  return taskContent;
+}
+
+const Card = (props) =>{
+  return <div className="card container mx-auto bg-slate-100 text-red-600 text-lg px-3 py-3 rounded-lg font-semibold border-l-8 border-slate-800 my-3">
+    {props.children}
+  </div>
 }
 
 const Button = (props) =>{
@@ -46,12 +129,6 @@ const Button = (props) =>{
       <span className="text">{props.text}</span>
     </div>
   return buttonContent;
-}
-
-const getTime = (s) =>{
-  const minutes = Math.floor(s / 60);
-  const seconds = s % 60;
-  return `${minutes<10?`0${minutes}`:`${minutes }`}:${seconds<10?`0${seconds}`:`${seconds}`}`;
 }
 
 const Timing = (props) =>{
@@ -70,12 +147,14 @@ const Timing = (props) =>{
         () => setTime(prev => prev - 1), 1000
       )
     )
+    props.onStart();
   }
 
   const stopTimer = () => {
     if(!intervalFcn) return;
     clearInterval(intervalFcn);
     setIntervalFcn(null);
+    props.onStop();
   }
 
 
@@ -85,7 +164,7 @@ const Timing = (props) =>{
 
   
   const timingContent = 
-    <div className="timer-container text-center bg-red-300 m-8 px-20 py-10 rounded-xl box-border w-1/2 whitespace-pre-wrap">
+    <div className="timer-container text-center bg-red-300 m-8 px-20 py-10 rounded-xl box-border">
       <section className="options"></section>
       <section className="counter text-9xl my-4 min-w-max block">{remaining}</section>
       <section className="actions flex flex-row justify-evenly">
