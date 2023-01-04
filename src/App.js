@@ -29,8 +29,8 @@ function App() {
     <section className="timer container mx-auto flex justify-center">
       <Timing/>
     </section>
-    <section className="info">Info</section>
-    <section className="tasks">Tasks</section>
+    {/* <section className="info">Info</section>
+    <section className="tasks">Tasks</section> */}
   </div>
   return content;
 }
