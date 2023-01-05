@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useState, useEffect } from "react";
 import {IconContext} from "react-icons";
 import {GiTomato} from 'react-icons/gi';
 import {RxGear} from 'react-icons/rx';
-import {BsThreeDotsVertical} from "react-icons/bs";
 import {SiAddthis} from "react-icons/si";
 
 const WhiteIcon = (props) => {
@@ -36,9 +35,17 @@ function App() {
   }
 
   const handleNewTask = () => {
-    const task = prompt("What is the task name?");
+    const taskName = prompt("What is the task name?");
+    const task = {
+      id: Date.now(),
+      text: taskName
+    };
     setTasks(prevTasks => [...prevTasks, task]);
     alert("New task added.")
+  }
+
+  const handleClickedTask = (task) => {
+    setTasks(prevTasks => prevTasks.filter(cTask => cTask !== task));
   }
 
   const noTasks = <div className="no-tasks">
@@ -46,26 +53,18 @@ function App() {
   </div>
 
   const content = <div className="app container mx-auto font-medium font-mono my-4 text-neutral-100 ">
-    <section className="options container mx-auto flex flex-row justify-between">
-      <Button text="Pomotracker">
-        <WhiteIcon><GiTomato/></WhiteIcon>
-      </Button>
-      <Button text="Settings">
-        <WhiteIcon><RxGear/></WhiteIcon>
-      </Button>
-    </section>
+    <Header/>
     <section className="timer container mx-auto flex justify-center">
       <Timing onStart={handleStart} onStop={handleStop}/>
     </section>
     <section className="info container mx-auto flex justify-center text-lg">
       {status}
     </section>
-    <section className="tasks container mx-auto m-4 flex flex-col justify-center items-center">
-      <div className="actions w-1/4 border-b-2 flex justify-between text-xl pb-2 items-center">
+    <section className="tasks container mx-auto m-4 flex flex-col justify-center items-center w-1/4">
+      <div className="actions w-full border-b-2 flex justify-between text-xl pb-2 items-center">
         <span>Tasks</span>
-        {/* TODO: <ContextualMenu/> */}
       </div>
-      <div className="viewer my-4 w-1/4 flex justify-center text-lg">
+      <div className="viewer my-4 w-full flex justify-center text-lg">
       {
           tasks.length === 0 && noTasks
       } 
@@ -74,15 +73,15 @@ function App() {
         <div className="tasks w-full">
           {
             tasks.map(task => 
-              <Card key={task}>
-                <Task name={task}/>
+              <Card key={task.id}>
+                <Task task={task} onClicked={handleClickedTask}/>
               </Card>  
             )
           }
         </div>
       }
       </div>
-      <div className="new-task flex flex-row w-1/4 justify-center text-lg border-white border-2 border-dashed rounded-lg py-3 cursor-pointer hover:bg-red-400 duration-300" onClick={handleNewTask}>
+      <div className="new-task flex flex-row w-full justify-center text-lg border-white border-2 border-dashed rounded-lg py-3 cursor-pointer hover:bg-red-400 duration-300" onClick={handleNewTask}>
         <span className="icon mr-4">
           <WhiteIcon><SiAddthis/></WhiteIcon>
         </span>
@@ -93,20 +92,29 @@ function App() {
   return content;
 }
 
-const ContextualMenu = (props) =>{
-  const menu = <section className="actions">
-    <div className="menu-container border-4 py-2 px-1 border-red-200 rounded-md cursor-pointer hover:border-red-300 duration-300"><BsThreeDotsVertical/></div>
+const Header = () => {
+  const content = <section className="options container mx-auto flex flex-row justify-between">
+    <Button text="Pomotracker">
+      <WhiteIcon><GiTomato/></WhiteIcon>
+    </Button>
+    <Button text="Settings">
+      <WhiteIcon><RxGear/></WhiteIcon>
+    </Button>
   </section>
-  return menu;
+
+  return content;
 }
 
 const Task = (props) =>{
+  const handleTaskClicked = () => {
+    props.onClicked(props.task);
+  }
+
   const taskContent = <div className="task flex flex-row items-center justify-between">
     <section className="status flex flex-row items-center">
-      <span className="state inline-block w-9 h-9 mr-2 bg-red-400 flex items-center rounded-full after:content-[''] after:border-r-4 after:border-b-4 after:border-white after:w-2 after:h-4 after:block after:mx-auto after:rotate-45 hover:bg-red-300 cursor-pointer duration-300"></span>
-      <span className="info">{props.name}</span>
+      <span className="state inline-block w-9 h-9 mr-2 bg-red-400 flex items-center rounded-full after:content-[''] after:border-r-4 after:border-b-4 after:border-white after:w-2 after:h-4 after:block after:mx-auto after:rotate-45 hover:bg-red-300 cursor-pointer duration-300" onClick={handleTaskClicked}></span>
+      <span className="info">{props.task.text}</span>
     </section>
-    <ContextualMenu/>
   </div>
 
   return taskContent;
@@ -176,6 +184,12 @@ const Timing = (props) =>{
   return timingContent;
 }
 
-
+// TODO:
+// const ContextualMenu = (props) =>{
+//   const menu = <section className="actions">
+//     <div className="menu-container border-4 py-2 px-1 border-red-200 rounded-md cursor-pointer hover:border-red-300 duration-300"><BsThreeDotsVertical/></div>
+//   </section>
+//   return menu;
+// }
 
 export default App;
