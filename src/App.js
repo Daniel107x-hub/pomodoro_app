@@ -23,6 +23,7 @@ function App() {
   useLayoutEffect(() => {
     document.body.className = "bg-red-500";
   }, []);
+  
   const [status, setStatus] = useState("Time to focus");
   const [tasks, setTasks] = useState([]);
 
@@ -34,6 +35,10 @@ function App() {
     setStatus("Time to focus");
   }
 
+  const handleClickedTask = (task) => {
+    setTasks(prevTasks => prevTasks.filter(cTask => cTask !== task));
+  }
+
   const handleNewTask = () => {
     const taskName = prompt("What is the task name?");
     const task = {
@@ -41,18 +46,9 @@ function App() {
       text: taskName
     };
     setTasks(prevTasks => [...prevTasks, task]);
-    alert("New task added.")
   }
 
-  const handleClickedTask = (task) => {
-    setTasks(prevTasks => prevTasks.filter(cTask => cTask !== task));
-  }
-
-  const noTasks = <div className="no-tasks">
-    You have no tasks!
-  </div>
-
-  const content = <div className="app container mx-auto font-medium font-mono my-4 text-neutral-100 ">
+  const content = <div className="app container mx-auto font-medsium font-mono my-4 text-neutral-100 ">
     <Header/>
     <section className="timer container mx-auto flex justify-center">
       <Timing onStart={handleStart} onStop={handleStop}/>
@@ -60,35 +56,53 @@ function App() {
     <section className="info container mx-auto flex justify-center text-lg">
       {status}
     </section>
-    <section className="tasks container mx-auto m-4 flex flex-col justify-center items-center w-1/4">
-      <div className="actions w-full border-b-2 flex justify-between text-xl pb-2 items-center">
-        <span>Tasks</span>
-      </div>
-      <div className="viewer my-4 w-full flex justify-center text-lg">
-      {
-          tasks.length === 0 && noTasks
-      } 
-      {
-        tasks.length > 0 &&
-        <div className="tasks w-full">
-          {
-            tasks.map(task => 
-              <Card key={task.id}>
-                <Task task={task} onClicked={handleClickedTask}/>
-              </Card>  
-            )
-          }
-        </div>
-      }
-      </div>
-      <div className="new-task flex flex-row w-full justify-center text-lg border-white border-2 border-dashed rounded-lg py-3 cursor-pointer hover:bg-red-400 duration-300" onClick={handleNewTask}>
-        <span className="icon mr-4">
-          <WhiteIcon><SiAddthis/></WhiteIcon>
-        </span>
-        <span className="text">Add task</span>
-      </div>
-    </section>
+    <TasksViewer tasks={tasks} onClickedTask={handleClickedTask} onNewTask={handleNewTask}/>
   </div>
+  return content;
+}
+
+const TasksViewer = (props) => {
+  const handleClickedTask = (task) => {
+    props.onClickedTask(task);
+  }
+
+  const handleNewTask = () => {
+    props.onNewTask();
+  }
+
+  const noTasks = <div className="no-tasks">
+    You have no tasks!
+  </div>
+
+  const content = <section className="tasks container mx-auto m-4 flex flex-col justify-center items-center w-1/4">
+    <div className="actions w-full border-b-2 flex justify-between text-xl pb-2 items-center">
+      <span>Tasks</span>
+    </div>
+    <div className="viewer my-4 w-full flex justify-center text-lg">
+    {
+        props.tasks.length === 0 && noTasks
+    } 
+    {
+      props.tasks.length > 0 &&
+      <div className="tasks w-full">
+        {
+          props.tasks.map(task => 
+            <Card key={task.id}>
+              <Task task={task} onClicked={handleClickedTask}/>
+            </Card>  
+          )
+        }
+      </div>
+    }
+    </div>
+    <div className="new-task flex flex-row w-full justify-center text-lg border-white border-2 border-dashed rounded-lg py-3 cursor-pointer hover:bg-red-400 duration-300" onClick={handleNewTask}>
+      <span className="icon mr-4">
+        <WhiteIcon><SiAddthis/></WhiteIcon>
+      </span>
+      <span className="text">Add task</span>
+    </div>
+  </section>
+
   return content;
 }
 
