@@ -23,9 +23,10 @@ function App() {
   useLayoutEffect(() => {
     document.body.className = "bg-red-500";
   }, []);
-  
+
   const [status, setStatus] = useState("Time to focus");
   const [tasks, setTasks] = useState([]);
+  const [time, setTime] = useState(25 * 60);
 
   const handleStart = () => {
     setStatus("Keep working");
@@ -48,10 +49,15 @@ function App() {
     setTasks(prevTasks => [...prevTasks, task]);
   }
 
+  const onTimerUpdate = (time) => {
+    const minutes = time * 60;
+    setTime(minutes);
+  }
+
   const content = <div className="app container mx-auto font-medsium font-mono my-4 text-neutral-100 ">
-    <Header/>
+    <Header onTimerUpdate={onTimerUpdate}/>
     <section className="timer container mx-auto flex justify-center">
-      <Timing onStart={handleStart} onStop={handleStop}/>
+      <Timing time={time} onStart={handleStart} onStop={handleStop}/>
     </section>
     <section className="info container mx-auto flex justify-center text-lg">
       {status}
@@ -106,14 +112,44 @@ const TasksViewer = (props) => {
   return content;
 }
 
-const Header = () => {
-  const content = <section className="options container mx-auto flex flex-row justify-between">
+const Header = (props) => {
+  const [viewSettings, setViewSettings] = useState(false);
+  const handleClickedSettings = () => {
+    setViewSettings(prevSettings => !prevSettings);
+  }
+
+  const content = <section className="options container mx-auto flex flex-row justify-between relative">
     <Button text="Pomotracker">
       <WhiteIcon><GiTomato/></WhiteIcon>
     </Button>
-    <Button text="Settings">
+    <Button text="Settings" onClick={handleClickedSettings}>
       <WhiteIcon><RxGear/></WhiteIcon>
     </Button>
+    <Settings onTimerUpdate={props.onTimerUpdate} className={`${viewSettings ? "visible" : "invisible"}}`}/>
+  </section>
+
+  return content;
+}
+
+const Settings = (props) => {
+  const [time, setTime] = useState(25);
+
+  const handleTimeChange = (e) => {
+    setTime(e.target.value);
+  }
+
+  const updateTimer = () => {
+    props.onTimerUpdate(time);
+  }
+
+  const content = <section className={`settings absolute right-0 top-16 ${props.className}`}>
+    <Card>
+      <div className="timer-settings flex flex-col items-center justify-center text-xl">
+        <label htmlFor="timer">Set the timer!</label>
+        <input type="number" name="timer" id="timer" value={time} onChange={handleTimeChange} className="my-2"/>
+        <Button text="Set" onClick={updateTimer} className="text-zinc-200"/>
+      </div>
+    </Card>
   </section>
 
   return content;
@@ -135,7 +171,7 @@ const Task = (props) =>{
 }
 
 const Card = (props) =>{
-  return <div className="card container mx-auto bg-slate-100 text-red-600 text-lg px-3 py-3 rounded-lg font-semibold border-l-8 border-slate-800 my-3">
+  return <div className={`card container mx-auto bg-slate-100 text-red-600 text-lg px-3 py-3 rounded-lg font-semibold border-l-8 border-slate-800 my-3 ${props.className}`}>
     {props.children}
   </div>
 }
@@ -154,9 +190,13 @@ const Button = (props) =>{
 }
 
 const Timing = (props) =>{
-  const [time, setTime] = useState(25*60);
+  const [time, setTime] = useState(props.time || 25*60);
   const [remaining, setRemaining] = useState("00:00");
   const [intervalFcn, setIntervalFcn] = useState(null);
+
+  useEffect(()=>{
+    setTime(props.time);
+  },[props.time]);
 
   useEffect(()=>{
     setRemaining(getTime(time));

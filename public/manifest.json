@@ -1,13 +1,6 @@
 {
   "short_name": "Pomotracker",
   "name": "Pomodoro tracker app",
-  "icons": [
-    {
-      "src": "main.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
